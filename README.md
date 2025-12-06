@@ -25,22 +25,6 @@ We realized that to help these kids, we need to give them what they actually nee
 ## Architecture
 The application follows a modern client-server architecture:
 
-```mermaid
-graph TD
-    User[User] -->|Interacts| Client[Next.js Frontend]
-    
-    subgraph Frontend
-        Client -->|Renders| Game[3D Game (R3F)]
-        Client -->|Renders| UI[React UI / ChatBox]
-    end
-    
-    Client -->|API Calls| Server[Express Backend]
-    
-    subgraph Backend
-        Server -->|Auth/Logic| API[API Routes]
-        API -->|Inference| Claude[Anthropic Claude API]
-    end
-```
 
 1.  **Frontend**: Built with **Next.js**, utilizing **React Three Fiber** for rendering the 3D game world and **Tailwind CSS** for the responsive UI.
 2.  **Backend**: A lightweight **Express.js** server that handles API requests.
