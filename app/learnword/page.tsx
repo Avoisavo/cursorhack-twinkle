@@ -4,6 +4,7 @@ import { useState, useEffect, Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { Loader } from '@react-three/drei';
 import { motion } from 'framer-motion';
+import confetti from 'canvas-confetti';
 import { validateLearnWordData, processToChapters } from './processor';
 import { mockAIResult } from './data';
 import { LearningStep, LearningState } from './types';
@@ -68,6 +69,48 @@ export default function LearnWordPage() {
         }, 4500);
         return () => clearTimeout(timer);
     }, []);
+
+    // Confetti effect when level is complete
+    useEffect(() => {
+        if (isLevelComplete) {
+            const count = 200;
+            const defaults = {
+                origin: { y: 0.7 },
+                zIndex: 1000, // Ensure it's on top
+            };
+
+            function fire(particleRatio: number, opts: any) {
+                confetti({
+                    ...defaults,
+                    ...opts,
+                    particleCount: Math.floor(count * particleRatio)
+                });
+            }
+
+            fire(0.25, {
+                spread: 26,
+                startVelocity: 55,
+            });
+            fire(0.2, {
+                spread: 60,
+            });
+            fire(0.35, {
+                spread: 100,
+                decay: 0.91,
+                scalar: 0.8
+            });
+            fire(0.1, {
+                spread: 120,
+                startVelocity: 25,
+                decay: 0.92,
+                scalar: 1.2
+            });
+            fire(0.1, {
+                spread: 120,
+                startVelocity: 45,
+            });
+        }
+    }, [isLevelComplete]);
 
     // Auto-play audio when entering SHOW step
     useEffect(() => {
@@ -449,7 +492,7 @@ export default function LearnWordPage() {
 
             {/* Navbar */}
             <LearnWordNavbar />
-            
+
             {/* 3D Book Background */}
             <div className="fixed inset-0 z-0">
                 <Canvas shadows camera={{
