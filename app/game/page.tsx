@@ -3,7 +3,9 @@
 import React, { useRef, useState, useEffect, useMemo } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { useFBX, useAnimations, Text, Environment, OrbitControls, Cloud, useTexture } from '@react-three/drei';
+
 import * as THREE from 'three';
+import Image from 'next/image';
 
 // --- Constants ---
 const LANE_WIDTH = 2; // Width of each lane
@@ -259,24 +261,84 @@ function StartScreen({ onStart }: { onStart: () => void }) {
     );
 }
 
+function Sparkles() {
+    const [exploded, setExploded] = useState(false);
+
+    useEffect(() => {
+        requestAnimationFrame(() => setExploded(true));
+    }, []);
+
+    const sparkles = useMemo(() => Array.from({ length: 40 }).map((_, i) => {
+        const angle = Math.random() * Math.PI * 2;
+        const radius = 200 + Math.random() * 200; // Explode radius
+        return {
+            id: i,
+            endX: Math.cos(angle) * radius,
+            endY: Math.sin(angle) * radius,
+            color: ['#FFD700', '#FFA500', '#FFFFFF'][Math.floor(Math.random() * 3)],
+            delay: Math.random() * 0.2,
+            scale: 0.5 + Math.random() * 1
+        };
+    }), []);
+
+    return (
+        <div className="absolute inset-0 pointer-events-none flex items-center justify-center overflow-visible">
+            {sparkles.map(s => (
+                <div
+                    key={s.id}
+                    className={`absolute rounded-full transition-all duration-1000 ease-out ${exploded ? 'opacity-0' : 'opacity-100'}`}
+                    style={{
+                        width: '12px',
+                        height: '12px',
+                        backgroundColor: s.color,
+                        transform: exploded
+                            ? `translate(${s.endX}px, ${s.endY}px) scale(0)`
+                            : `translate(0px, 0px) scale(${s.scale})`,
+                        transitionDelay: `${s.delay}s`
+                    }}
+                />
+            ))}
+        </div>
+    );
+}
+
 function GameOverScreen({ result, onRestart }: { result: 'correct' | 'wrong', onRestart: () => void }) {
     const isWin = result === 'correct';
+
+    if (isWin) {
+        return (
+            <div
+                onClick={onRestart}
+                className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/60 backdrop-blur-md cursor-pointer"
+            >
+                <div className="relative flex items-center justify-center">
+                    <Sparkles />
+                    <div className="relative w-[700px] h-[700px] animate-in zoom-in duration-500">
+                        <Image
+                            src="/welldone.png"
+                            alt="Well Done"
+                            fill
+                            className="object-contain drop-shadow-[0_0_50px_rgba(255,215,0,0.5)]"
+                        />
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/60 backdrop-blur-md">
             <div className="bg-white p-10 rounded-3xl shadow-2xl flex flex-col items-center animate-in fade-in zoom-in duration-300 text-center">
-                <div className="text-6xl mb-4">
-                    {isWin ? '🎉' : '💥'}
-                </div>
-                <h2 className={`text-4xl font-black mb-2 ${isWin ? 'text-green-500' : 'text-red-500'}`}>
-                    {isWin ? 'Correct!' : 'Wrong Answer!'}
+                <div className="text-6xl mb-4">💥</div>
+                <h2 className="text-4xl font-black mb-2 text-red-500">
+                    Wrong Answer!
                 </h2>
                 <p className="text-slate-500 mb-8 text-lg">
-                    {isWin ? 'Great job! Keep running!' : 'Oops! Better luck next time.'}
+                    Oops! Better luck next time.
                 </p>
                 <button
                     onClick={onRestart}
-                    className={`px-8 py-4 text-white text-xl font-bold rounded-full shadow-lg hover:scale-105 hover:shadow-xl transition-all active:scale-95 ${isWin ? 'bg-green-500 hover:bg-green-600' : 'bg-red-500 hover:bg-red-600'
-                        }`}
+                    className="px-8 py-4 bg-red-500 hover:bg-red-600 text-white text-xl font-bold rounded-full shadow-lg hover:scale-105 hover:shadow-xl transition-all active:scale-95"
                 >
                     Play Again
                 </button>
