@@ -9,10 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@elevenlabs/elevenlabs-js": "^2.26.0",
-    "cors": "^2.8.5",
-    "dotenv": "^17.2.3",
-    "express": "^5.2.1",
+    "@anthropic-ai/sdk": "^0.71.2",
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.4.2",
     "@react-three/postprocessing": "^3.0.4",
@@ -38,5 +35,10 @@
     "eslint-config-next": "16.0.7",
     "tailwindcss": "^4",
     "typescript": "^5"
+  },
+  "overrides": {
+    "framer-motion-3d": {
+      "@react-three/fiber": "$@react-three/fiber"
+    }
   }
 }
