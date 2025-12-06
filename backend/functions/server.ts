@@ -3,7 +3,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import OpenAI from "openai";
 import { ChatCompletionMessageParam, ChatCompletionTool } from "openai/resources/chat/completions";
-import { functions, functionMap } from "./functions";
+import { functions, functionMap } from "./index";
 
 dotenv.config();
 

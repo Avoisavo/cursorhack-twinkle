@@ -14,6 +14,7 @@ import { SpeakerIcon } from './components/Icons';
 import { HelloKittyModel } from './components/HelloKitty3D';
 import { BookScene } from './components/BookScene';
 import { BookPageLayout } from './components/BookPageLayout';
+import LearnWordNavbar from './components/LearnWordNavbar';
 
 
 export default function LearnWordPage() {
@@ -445,6 +446,10 @@ export default function LearnWordPage() {
             backgroundPosition: 'center',
             backgroundRepeat: 'no-repeat'
         }}>
+
+            {/* Navbar */}
+            <LearnWordNavbar />
+            
             {/* 3D Book Background */}
             <div className="fixed inset-0 z-0">
                 <Canvas shadows camera={{
