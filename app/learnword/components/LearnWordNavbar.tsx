@@ -5,7 +5,7 @@ import Link from "next/link";
 
 export default function LearnWordNavbar() {
     return (
-        <div className="absolute top-0 left-0 w-full p-6 flex justify-between items-start z-50 pointer-events-none">
+        <div className="absolute top-0 left-0 w-full px-6 pt-0 flex justify-between items-start z-50 pointer-events-none">
             {/* Left - Title */}
             <div className="pointer-events-auto">
                 <img

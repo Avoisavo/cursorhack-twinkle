@@ -6,9 +6,9 @@ import * as THREE from 'three';
 
 // --- Constants ---
 const COVER_WIDTH = 6.2;
-const COVER_HEIGHT = 8.2;
+const COVER_HEIGHT = 7.9;
 const PAGE_WIDTH = 5.8;
-const PAGE_HEIGHT = 7.8;
+const PAGE_HEIGHT = 7.5;
 const PAGE_THICKNESS = 0.05; // Thinner pages for better stacking
 const Z_GAP = 0.06; // Gap between pages to prevent z-fighting
 const COVER_THICKNESS = 0.15;
@@ -254,7 +254,7 @@ export default function Book3D({ pages, flippedIndex }: Book3DProps) {
                                 position={[0, 0, 0]}
                                 style={{
                                     width: '480px',
-                                    height: '640px',
+                                    height: '600px',
                                     display: 'flex',
                                     flexDirection: 'column',
                                     alignItems: 'center',
@@ -287,7 +287,7 @@ export default function Book3D({ pages, flippedIndex }: Book3DProps) {
                             position={[0, 0, 0]}
                             style={{
                                 width: '480px',
-                                height: '640px',
+                                height: '600px',
                                 display: 'flex',
                                 flexDirection: 'column',
                                 alignItems: 'center',
