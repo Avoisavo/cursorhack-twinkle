@@ -1,7 +1,7 @@
 import React, { useRef, useState, useMemo } from 'react';
 import { Canvas, useFrame, ThreeEvent } from '@react-three/fiber';
 import { EffectComposer, N8AO, Bloom } from '@react-three/postprocessing';
-import { RoundedBox, OrbitControls, Environment, Float, Center, ContactShadows, useTexture } from '@react-three/drei';
+import { RoundedBox, OrbitControls, Environment, Float, Center, ContactShadows, useTexture, Html } from '@react-three/drei';
 import * as THREE from 'three';
 
 // --- Constants & Data ---
@@ -20,6 +20,7 @@ interface BookProps {
     rotation?: [number, number, number];
     color: string;
     args?: [number, number, number];
+    hoverLabel?: string;
 }
 
 interface TextureMaterialProps {
@@ -77,11 +78,12 @@ interface ShelfItem {
     args?: [number, number, number];      // Only for books
     color: string;
     decorationType?: 'sphere' | 'cube' | 'blob'; // Only for decorations
+    hoverLabel?: string;
 }
 
 // --- Components ---
 
-const Book: React.FC<BookProps> = ({ position, rotation = [0, 0, 0], color, args = [0.2, 1, 0.8] }) => {
+const Book: React.FC<BookProps> = ({ position, rotation = [0, 0, 0], color, args = [0.2, 1, 0.8], hoverLabel }) => {
     const group = useRef<THREE.Group>(null);
     const [hovered, setHover] = useState(false);
     const [active, setActive] = useState(false);
@@ -158,6 +160,37 @@ const Book: React.FC<BookProps> = ({ position, rotation = [0, 0, 0], color, args
             >
                 <meshStandardMaterial color={color} roughness={0.4} />
             </RoundedBox>
+            {/* Hover Bubble */}
+            {hovered && hoverLabel && (
+                <Html position={[0, height / 2 + 0.5, 0]} center distanceFactor={8} zIndexRange={[100, 0]}>
+                    <div style={{
+                        background: 'white',
+                        padding: '8px 12px',
+                        borderRadius: '12px',
+                        boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+                        pointerEvents: 'none',
+                        whiteSpace: 'nowrap',
+                        fontWeight: 'bold',
+                        color: 'black',
+                        fontSize: '14px',
+                        border: '1px solid #ddd',
+                        position: 'relative',
+                    }}>
+                        {hoverLabel}
+                        <div style={{
+                            position: 'absolute',
+                            bottom: '-6px',
+                            left: '50%',
+                            marginLeft: '-6px',
+                            width: '0',
+                            height: '0',
+                            borderLeft: '6px solid transparent',
+                            borderRight: '6px solid transparent',
+                            borderTop: '6px solid white',
+                        }} />
+                    </div>
+                </Html>
+            )}
         </group>
     );
 };
@@ -543,7 +576,8 @@ const Bookshelf: React.FC = () => {
                                 position: [currentX + bookHeight / 2, surfaceY + bookWidth / 2 + k * bookWidth, 0],
                                 rotation: [0, 0, -Math.PI / 2],
                                 args: [bookWidth, bookHeight, 0.8], // width is thickness, height is length
-                                color
+                                color,
+                                hoverLabel: i === 1 ? "Vocabulary Practice" : "Game Practice"
                             });
                         }
                         currentX += bookHeight + 0.05;
@@ -562,7 +596,8 @@ const Bookshelf: React.FC = () => {
                             position: [currentX + bookWidth / 2, surfaceY + actualBookHeight / 2, 0],
                             rotation: [0, 0, 0],
                             args: [bookWidth, actualBookHeight, 0.8],
-                            color
+                            color,
+                            hoverLabel: i === 1 ? "Vocabulary Practice" : "Game Practice"
                         });
                         currentX += bookWidth + 0.05;
                     }
@@ -585,6 +620,39 @@ const Bookshelf: React.FC = () => {
             }
             data.push(items);
         }
+
+        // --- Post-Processing: Move Blue Element ---
+        // Find the blue book (#45B7D1) on the Top Shelf (index 1)
+        // and swap it with a random book on the Bottom Shelf (index 0).
+        if (data.length >= 2) {
+            const topShelf = data[1];
+            const bottomShelf = data[0];
+
+            const blueBookIndex = topShelf.findIndex(item => item.type === 'book' && item.color === '#45B7D1');
+
+            if (blueBookIndex !== -1) {
+                // Find a suitable swap candidate on the bottom shelf (preferably a vertical book for simple swap)
+                // Filter for books.
+                const candidateIndices = bottomShelf
+                    .map((item, index) => ({ item, index }))
+                    .filter(({ item }) => item.type === 'book')
+                    .map(({ index }) => index);
+
+                if (candidateIndices.length > 0) {
+                    // Pick a random candidate from bottom shelf to swap with
+                    // Using seededRandom to keep it deterministic? 
+                    // We can reuse seededRandom if checking it doesn't mess up loop (limit is unknown but fine here)
+                    // Or just pick the first one or middle one. Let's pick the last one.
+                    const targetIndex = candidateIndices[candidateIndices.length - 1];
+
+                    // Swap Colors
+                    const tempColor = topShelf[blueBookIndex].color;
+                    topShelf[blueBookIndex].color = bottomShelf[targetIndex].color;
+                    bottomShelf[targetIndex].color = tempColor;
+                }
+            }
+        }
+
         return data;
     }, [height, width, gapHeight, shelfCount, totalShelfThickness, thickness]);
 
@@ -663,7 +731,7 @@ const Bookshelf: React.FC = () => {
                 <group key={i}>
                     {shelfItems.map((item, j) => (
                         item.type === 'book' ? (
-                            <Book key={j} position={item.position} rotation={item.rotation} args={item.args} color={item.color} />
+                            <Book key={j} position={item.position} rotation={item.rotation} args={item.args} color={item.color} hoverLabel={item.hoverLabel} />
                         ) : (
                             <Decoration key={j} position={item.position} color={item.color} type={item.decorationType} />
                         )

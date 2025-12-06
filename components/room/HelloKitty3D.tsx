@@ -1,16 +1,25 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useFBX, useAnimations, Html } from "@react-three/drei";
 import { useThree, useFrame } from "@react-three/fiber";
-import { motion } from "framer-motion-3d";
 import * as THREE from "three";
 
-const MotionGroup = motion.group as any;
+interface HelloKitty3DProps {
+    onHelloComplete?: () => void;
+    onLoad?: () => void;
+}
 
-export default function HelloKitty3D() {
+export default function HelloKitty3D({ onHelloComplete, onLoad }: HelloKitty3DProps = {}) {
     const group = useRef<any>(null);
     const waveFbx = useFBX("/hellokitty/helloModel/chatboxwave.fbx");
     const idleFbx = useFBX("/hellokitty/helloModel/dwarf Idle.fbx");
     const { viewport } = useThree();
+
+    // Trigger onLoad when component mounts (meaning FBX is loaded)
+    useEffect(() => {
+        if (onLoad) {
+            onLoad();
+        }
+    }, [onLoad]);
 
     // Prepare animations
     const animations: THREE.AnimationClip[] = [];
@@ -25,7 +34,24 @@ export default function HelloKitty3D() {
 
     const { actions, mixer } = useAnimations(animations, group);
 
-    const [currentVariant, setCurrentVariant] = useState("center");
+    const [currentVariant, setCurrentVariant] = useState<"center" | "corner">("center");
+
+    // Animation state
+    const targetState = useRef({
+        scale: 0.015,
+        x: 0,
+        y: -1.8,
+        z: 0,
+        rotateY: 0,
+    });
+
+    const currentState = useRef({
+        scale: 0.015,
+        x: 0,
+        y: -1.8,
+        z: 0,
+        rotateY: 0,
+    });
 
     useEffect(() => {
         if (!actions || !actions["Wave"] || !actions["Idle"]) {
@@ -52,6 +78,11 @@ export default function HelloKitty3D() {
 
                 // Trigger move to corner
                 setCurrentVariant("corner");
+
+                // Call the completion callback if provided
+                if (onHelloComplete) {
+                    onHelloComplete();
+                }
             }
         };
 
@@ -62,33 +93,70 @@ export default function HelloKitty3D() {
         };
     }, [actions, mixer]);
 
-    // Animation variants
-    const variants = {
-        center: {
-            scale: 0.015, // Adjust based on model size
-            x: 0,
-            y: -1.8, // Moved up a bit (was -2.5)
-            z: 0,
-            rotateY: 0,
-            transition: { duration: 1.5, ease: "easeInOut" }
-        },
-        corner: {
-            scale: 0.01, // Smaller
-            x: -viewport.width / 2 + 1.5, // Left corner + padding
-            y: -viewport.height / 2 + 1, // Bottom corner + padding
-            z: 0,
-            rotateY: 0.5, // Slight turn
-            transition: { duration: 2, ease: "easeInOut" }
+    // Update target state when variant changes
+    useEffect(() => {
+        if (currentVariant === "center") {
+            targetState.current = {
+                scale: 0.015,
+                x: 0,
+                y: -1.8,
+                z: 0,
+                rotateY: 0,
+            };
+        } else {
+            targetState.current = {
+                scale: 0.015, // Keep same scale as center
+                x: -2.0, // More to the left
+                y: -1.8, // Keep same Y position
+                z: 0,
+                rotateY: 0.2, // Slight turn to the right
+            };
         }
-    };
+    }, [currentVariant, viewport.width, viewport.height]);
+
+    // Animate towards target state
+    useFrame(() => {
+        if (!group.current) return;
+
+        const lerpSpeed = 0.05; // Adjust for animation speed
+
+        currentState.current.scale = THREE.MathUtils.lerp(
+            currentState.current.scale,
+            targetState.current.scale,
+            lerpSpeed
+        );
+        currentState.current.x = THREE.MathUtils.lerp(
+            currentState.current.x,
+            targetState.current.x,
+            lerpSpeed
+        );
+        currentState.current.y = THREE.MathUtils.lerp(
+            currentState.current.y,
+            targetState.current.y,
+            lerpSpeed
+        );
+        currentState.current.z = THREE.MathUtils.lerp(
+            currentState.current.z,
+            targetState.current.z,
+            lerpSpeed
+        );
+        currentState.current.rotateY = THREE.MathUtils.lerp(
+            currentState.current.rotateY,
+            targetState.current.rotateY,
+            lerpSpeed
+        );
+
+        group.current.scale.setScalar(currentState.current.scale);
+        group.current.position.set(
+            currentState.current.x,
+            currentState.current.y,
+            currentState.current.z
+        );
+        group.current.rotation.y = currentState.current.rotateY;
+    });
 
     return (
-        <MotionGroup
-            ref={group}
-            animate={currentVariant}
-            variants={variants}
-            initial="center"
-        >
+        <group ref={group}>
             <primitive object={waveFbx} />
             {/* Add a light specifically for the model if needed */}
             <ambientLight intensity={0.5} />
@@ -125,7 +193,7 @@ export default function HelloKitty3D() {
                     </div>
                 </Html>
             )}
-        </MotionGroup>
+        </group>
     );
 }
 
