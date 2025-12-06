@@ -124,7 +124,9 @@ const Book: React.FC<BookProps> = ({ position, rotation = [0, 0, 0], color, args
             onClick={(e) => {
                 e.stopPropagation();
                 setActive(!active);
-                if (hoverLabel === "Vocabulary Practice") {
+                if (hoverLabel === "Dyslexia") {
+                    router.push('/dyslexia');
+                } else if (hoverLabel === "Vocabulary Practice") {
                     router.push('/learnword');
                 } else if (hoverLabel === "Game Practice") {
                     router.push('/game');
@@ -528,10 +530,10 @@ const CartoonEye: React.FC<CartoonEyeProps> = ({ position, rotation, side = 'lef
 const Bookshelf: React.FC = () => {
     // Shelf dimensions
     const width = 3.5;
-    const height = 3.5;
+    const height = 4.2;
     const depth = 1.5;
     const thickness = 0.2;
-    const shelfCount = 2; // Number of spaces (books sit in these spaces)
+    const shelfCount = 3; // Number of spaces (books sit in these spaces)
 
     const woodTexture = useTexture('/wood_color.png');
 
@@ -589,7 +591,7 @@ const Bookshelf: React.FC = () => {
                                 rotation: [0, 0, -Math.PI / 2],
                                 args: [bookWidth, bookHeight, 0.8], // width is thickness, height is length
                                 color,
-                                hoverLabel: i === 1 ? "Vocabulary Practice" : "Game Practice"
+                                hoverLabel: i === 2 ? "Dyslexia" : (i === 1 ? "Vocabulary Practice" : "Game Practice")
                             });
                         }
                         currentX += bookHeight + 0.05;
@@ -609,7 +611,7 @@ const Bookshelf: React.FC = () => {
                             rotation: [0, 0, 0],
                             args: [bookWidth, actualBookHeight, 0.8],
                             color,
-                            hoverLabel: i === 1 ? "Vocabulary Practice" : "Game Practice"
+                            hoverLabel: i === 2 ? "Dyslexia" : (i === 1 ? "Vocabulary Practice" : "Game Practice")
                         });
                         currentX += bookWidth + 0.05;
                     }
