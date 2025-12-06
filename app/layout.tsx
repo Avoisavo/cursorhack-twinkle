@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 
 import React from "react";
-import { Geist, Geist_Mono, Inter, Nunito, Comfortaa, Quicksand, Chewy, Rubik, Bubblegum_Sans, Bungee, Luckiest_Guy, Bangers } from "next/font/google";
-import localFont from "next/font/local";
+import { Geist, Geist_Mono, Inter, Nunito, Comfortaa, Quicksand, Chewy, Rubik, Bubblegum_Sans, Bungee, Luckiest_Guy, Bangers, DynaPuff } from "next/font/google";
+
 import "./globals.css";
 
 
@@ -76,9 +76,10 @@ const bangers = Bangers({
   weight: ["400"],
 });
 
-const dynaPuff = localFont({
-  src: "../public/fonts/DynaPuff-VariableFont_wdth,wght.ttf",
+const dynaPuff = DynaPuff({
   variable: "--font-dynapuff",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
