@@ -6,9 +6,10 @@ import * as THREE from "three";
 interface HelloKitty3DProps {
     onHelloComplete?: () => void;
     onLoad?: () => void;
+    showSecondBubble?: boolean;
 }
 
-export default function HelloKitty3D({ onHelloComplete, onLoad }: HelloKitty3DProps = {}) {
+export default function HelloKitty3D({ onHelloComplete, onLoad, showSecondBubble = false }: HelloKitty3DProps = {}) {
     const group = useRef<any>(null);
     const waveFbx = useFBX("/hellokitty/helloModel/chatboxwave.fbx");
     const idleFbx = useFBX("/hellokitty/helloModel/dwarf Idle.fbx");
@@ -180,6 +181,38 @@ export default function HelloKitty3D({ onHelloComplete, onLoad }: HelloKitty3DPr
                         marginBottom: '20px'
                     }}>
                         Hello my friend !
+                        <div style={{
+                            position: 'absolute',
+                            left: '0',
+                            bottom: '-10px',
+                            width: '0',
+                            height: '0',
+                            borderLeft: '10px solid white',
+                            borderBottom: '10px solid transparent',
+                            borderTop: '0'
+                        }} />
+                    </div>
+                </Html>
+            )}
+
+            {/* Second Chat Bubble - Visible in corner when triggered */}
+            {currentVariant === "corner" && showSecondBubble && (
+                <Html position={[0, 180, 0]} center>
+                    <div style={{
+                        background: 'white',
+                        padding: '16px 24px',
+                        borderRadius: '20px',
+                        borderBottomLeftRadius: '0',
+                        boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+                        fontFamily: 'sans-serif',
+                        fontSize: '20px',
+                        fontWeight: 'bold',
+                        color: '#333',
+                        whiteSpace: 'nowrap',
+                        position: 'relative',
+                        marginBottom: '20px'
+                    }}>
+                        What is the materials you want to choose?
                         <div style={{
                             position: 'absolute',
                             left: '0',

@@ -268,12 +268,13 @@ export default function Room() {
 
     const [showBookshelf, setShowBookshelf] = useState(false);
     const [isHelloKittyLoaded, setIsHelloKittyLoaded] = useState(false);
+    const [helloFinished, setHelloFinished] = useState(false);
 
-    // Show bookshelf 2 seconds after HelloKitty appears (loads)
+    // Show bookshelf 3 seconds after HelloKitty appears
     useEffect(() => {
         if (!isHelloKittyLoaded) return;
 
-        const delaySeconds = 5;
+        const delaySeconds = 3;
         const timer = setTimeout(() => {
             setShowBookshelf(true);
         }, delaySeconds * 1000);
@@ -326,9 +327,11 @@ export default function Room() {
                     */}
                     <ambientLight intensity={0.4} />
 
-                    <HelloKitty3D onLoad={() => setIsHelloKittyLoaded(true)} />
-
-                    {/* Bookshelf Model */}
+                    <HelloKitty3D
+                        onLoad={() => setIsHelloKittyLoaded(true)}
+                        onHelloComplete={() => setHelloFinished(true)}
+                        showSecondBubble={showBookshelf}
+                    />
 
                     {/* Bookshelf Model - Always rendered, visibility controlled by prop */}
                     <BookshelfAnimatedGroup visible={showBookshelf} onNavigate={handleNavigate} />
