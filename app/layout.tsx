@@ -95,6 +95,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
+        suppressHydrationWarning
         className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} ${nunito.variable} ${comfortaa.variable} ${quicksand.variable} ${chewy.variable} ${rubik.variable} ${bubblegumSans.variable} ${bungee.variable} ${luckiestGuy.variable} ${bangers.variable} ${dynaPuff.variable} antialiased`}
       >
         {children}

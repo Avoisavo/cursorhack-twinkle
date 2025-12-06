@@ -1,16 +1,42 @@
 import React, { useEffect, useState } from 'react';
 import styles from './GameLoader.module.css';
+import { useFBX } from "@react-three/drei";
+import * as PIXI from "pixi.js";
 
 interface GameLoaderProps {
     onFinished: () => void;
+    slideUpOnFinish?: boolean;
+    loadingText?: string;
 }
 
-const GameLoader: React.FC<GameLoaderProps> = ({ onFinished }) => {
+const GameLoader: React.FC<GameLoaderProps> = ({ onFinished, slideUpOnFinish = true, loadingText = "Generating the room......" }) => {
     const [progress, setProgress] = useState(0);
     const [isComplete, setIsComplete] = useState(false);
     // Simple state to ensure we don't start progress until video is at least ready to play
     // (Optional for video, but good practice to avoid black box)
     const [videoReady, setVideoReady] = useState(false);
+
+    // Preload Assets
+    useEffect(() => {
+        // Preload 3D Models
+        useFBX.preload("/hellokitty/helloModel/chatboxwave.fbx");
+        useFBX.preload("/hellokitty/helloModel/dwarf Idle.fbx");
+
+        // Preload PIXI Textures
+        const preloadPixiAssets = async () => {
+            try {
+                await PIXI.Assets.load([
+                    "/room/tiny_room.png",
+                    "/room/blade_blade.png",
+                    "/room/lleft_curtain.png",
+                    "/room/rright_curtain.png"
+                ]);
+            } catch (e) {
+                console.warn("Failed to preload PIXI assets", e);
+            }
+        };
+        preloadPixiAssets();
+    }, []);
 
     useEffect(() => {
         if (!videoReady) return;
@@ -19,7 +45,8 @@ const GameLoader: React.FC<GameLoaderProps> = ({ onFinished }) => {
 
         const simulateLoad = () => {
             setProgress((prev) => {
-                const next = prev + Math.random() * 1.5;
+                // Faster increment: random between 2 and 7
+                const next = prev + Math.random() * 5 + 2;
                 if (next >= 100) {
                     return 100;
                 }
@@ -41,12 +68,12 @@ const GameLoader: React.FC<GameLoaderProps> = ({ onFinished }) => {
             setIsComplete(true);
             setTimeout(() => {
                 onFinished();
-            }, 800);
+            }, 200); // Reduced delay from 800ms to 200ms
         }
     }, [progress, isComplete, onFinished]);
 
     return (
-        <div className={`${styles.container} ${isComplete ? styles.slideUp : ''}`}>
+        <div className={`${styles.container} ${isComplete && slideUpOnFinish ? styles.slideUp : ''}`}>
 
             {/* Video Layer */}
             <div className={styles.videoContainer}>
@@ -70,6 +97,9 @@ const GameLoader: React.FC<GameLoaderProps> = ({ onFinished }) => {
                         className={styles.loaderBar}
                         style={{ width: `${progress}%` }}
                     />
+                </div>
+                <div className={styles.loadingText}>
+                    {loadingText}
                 </div>
             </div>
         </div>

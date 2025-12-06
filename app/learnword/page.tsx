@@ -3,6 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { Loader } from '@react-three/drei';
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import confetti from 'canvas-confetti';
 import { validateLearnWordData, processToChapters } from './processor';
@@ -469,9 +470,29 @@ export default function LearnWordPage() {
         }
     }
 
+    const [showExitLoader, setShowExitLoader] = useState(false);
+    const [exitLoadingText, setExitLoadingText] = useState("");
+    const router = useRouter(); // Ensure useRouter is imported if not already
+
+    const handleHomeClick = () => {
+        setExitLoadingText("Going back to room ...");
+        setShowExitLoader(true);
+    };
+
+    const handleExitLoaderFinished = () => {
+        router.push('/room');
+    };
+
     return (
         <main className="bg-black min-h-screen">
-            <GameLoader onFinished={() => setAppStarted(true)} />
+            <GameLoader onFinished={() => setAppStarted(true)} loadingText="Opening the book......" />
+
+            {/* Exit Loader */}
+            {showExitLoader && (
+                <div className="absolute inset-0 z-[200]">
+                    <GameLoader onFinished={handleExitLoaderFinished} slideUpOnFinish={false} loadingText={exitLoadingText} />
+                </div>
+            )}
 
             {state && (
                 <div
@@ -484,7 +505,7 @@ export default function LearnWordPage() {
                     }}
                 >
                     {/* Navbar */}
-                    <LearnWordNavbar />
+                    <LearnWordNavbar onHomeClick={handleHomeClick} />
 
                     {/* 3D Book Background */}
                     <div className="fixed inset-0 z-0">
