@@ -126,6 +126,8 @@ const Book: React.FC<BookProps> = ({ position, rotation = [0, 0, 0], color, args
                 setActive(!active);
                 if (hoverLabel === "Vocabulary Practice") {
                     router.push('/learnword');
+                } else if (hoverLabel === "Game Practice") {
+                    router.push('/game');
                 }
             }}
         >
