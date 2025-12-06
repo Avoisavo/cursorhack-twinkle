@@ -1,32 +1,37 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useFBX, useAnimations, Html } from "@react-three/drei";
 import { useThree, useFrame } from "@react-three/fiber";
-import gsap from "gsap";
+import { motion } from "framer-motion-3d";
 import * as THREE from "three";
 
-interface HelloKitty3DProps {
-    onHelloComplete?: () => void;
-}
+const MotionGroup = motion.group as any;
 
-export default function HelloKitty3D({ onHelloComplete }: HelloKitty3DProps) {
+export default function HelloKitty3D() {
     const group = useRef<any>(null);
     const waveFbx = useFBX("/hellokitty/helloModel/chatboxwave.fbx");
     const idleFbx = useFBX("/hellokitty/helloModel/dwarf Idle.fbx");
     const { viewport } = useThree();
 
     // Prepare animations
-    if (waveFbx.animations.length > 0) waveFbx.animations[0].name = "Wave";
-    if (idleFbx.animations.length > 0) idleFbx.animations[0].name = "Idle";
+    const animations: THREE.AnimationClip[] = [];
+    if (waveFbx.animations && waveFbx.animations.length > 0) {
+        waveFbx.animations[0].name = "Wave";
+        animations.push(waveFbx.animations[0]);
+    }
+    if (idleFbx.animations && idleFbx.animations.length > 0) {
+        idleFbx.animations[0].name = "Idle";
+        animations.push(idleFbx.animations[0]);
+    }
 
-    const { actions, mixer } = useAnimations(
-        [waveFbx.animations[0], idleFbx.animations[0]],
-        group
-    );
+    const { actions, mixer } = useAnimations(animations, group);
 
     const [currentVariant, setCurrentVariant] = useState("center");
 
     useEffect(() => {
-        if (!actions || !actions["Wave"] || !actions["Idle"]) return;
+        if (!actions || !actions["Wave"] || !actions["Idle"]) {
+            console.warn("HelloKitty3D: Missing required actions (Wave or Idle)");
+            return;
+        }
 
         const waveAction = actions["Wave"];
         const idleAction = actions["Idle"];
@@ -47,11 +52,6 @@ export default function HelloKitty3D({ onHelloComplete }: HelloKitty3DProps) {
 
                 // Trigger move to corner
                 setCurrentVariant("corner");
-
-                // Notify parent that greeting is complete
-                if (onHelloComplete) {
-                    onHelloComplete();
-                }
             }
         };
 
@@ -62,55 +62,33 @@ export default function HelloKitty3D({ onHelloComplete }: HelloKitty3DProps) {
         };
     }, [actions, mixer]);
 
-    // GSAP Animations
-    useEffect(() => {
-        if (!group.current) return;
-
-        if (currentVariant === "center") {
-            gsap.to(group.current.position, {
-                x: 0,
-                y: -1.8,
-                z: 0,
-                duration: 1.5,
-                ease: "power2.inOut"
-            });
-            gsap.to(group.current.rotation, {
-                y: 0,
-                duration: 1.5,
-                ease: "power2.inOut"
-            });
-            gsap.to(group.current.scale, {
-                x: 0.015,
-                y: 0.015,
-                z: 0.015,
-                duration: 1.5,
-                ease: "power2.inOut"
-            });
-        } else if (currentVariant === "corner") {
-            gsap.to(group.current.position, {
-                x: -viewport.width / 2 + 1.5,
-                y: -viewport.height / 2 + 1,
-                z: 0,
-                duration: 2,
-                ease: "power2.inOut"
-            });
-            gsap.to(group.current.rotation, {
-                y: 0.5,
-                duration: 2,
-                ease: "power2.inOut"
-            });
-            gsap.to(group.current.scale, {
-                x: 0.01,
-                y: 0.01,
-                z: 0.01,
-                duration: 2,
-                ease: "power2.inOut"
-            });
+    // Animation variants
+    const variants = {
+        center: {
+            scale: 0.015, // Adjust based on model size
+            x: 0,
+            y: -1.8, // Moved up a bit (was -2.5)
+            z: 0,
+            rotateY: 0,
+            transition: { duration: 1.5, ease: "easeInOut" }
+        },
+        corner: {
+            scale: 0.01, // Smaller
+            x: -viewport.width / 2 + 1.5, // Left corner + padding
+            y: -viewport.height / 2 + 1, // Bottom corner + padding
+            z: 0,
+            rotateY: 0.5, // Slight turn
+            transition: { duration: 2, ease: "easeInOut" }
         }
-    }, [currentVariant, viewport]);
+    };
 
     return (
-        <group ref={group}>
+        <MotionGroup
+            ref={group}
+            animate={currentVariant}
+            variants={variants}
+            initial="center"
+        >
             <primitive object={waveFbx} />
             {/* Add a light specifically for the model if needed */}
             <ambientLight intensity={0.5} />
@@ -147,7 +125,7 @@ export default function HelloKitty3D({ onHelloComplete }: HelloKitty3DProps) {
                     </div>
                 </Html>
             )}
-        </group>
+        </MotionGroup>
     );
 }
 
