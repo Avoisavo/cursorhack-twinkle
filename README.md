@@ -45,8 +45,4 @@ The application follows a modern client-server architecture:
 -   **Server**: Express.js
 -   **AI Model**: Anthropic Claude 3.5 Sonnet (`@anthropic-ai/sdk`)
 
-## Team
--   [Tan Zhi Wei](https://www.linkedin.com/in/tanzhiwei0328/)
--   [Loy Qun Jie](https://www.linkedin.com/in/loy-qun-jie-904916328/)
--   [Lee Wai Yee](https://www.linkedin.com/in/lee-wai-yee/)
--   [Angel Phoon](https://www.linkedin.com/in/angel-phoon-an-gee-03558a1b1/)
+
