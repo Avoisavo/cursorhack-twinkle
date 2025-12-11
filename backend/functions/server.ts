@@ -156,6 +156,24 @@ app.post("/api/chat", async (req, res) => {
     }
 });
 
+import { runMultiAgentSystem } from "./multiAgent";
+
+app.post("/api/multi-agent", async (req, res) => {
+    try {
+        const { query } = req.body;
+        if (!query) {
+            res.status(400).json({ error: "Query is required" });
+            return;
+        }
+
+        const result = await runMultiAgentSystem(query);
+        res.json(result);
+    } catch (error) {
+        console.error("Error in multi-agent endpoint:", error);
+        res.status(500).json({ error: "Internal server error" });
+    }
+});
+
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
 });
