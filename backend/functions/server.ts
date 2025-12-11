@@ -4,7 +4,8 @@ import dotenv from "dotenv";
 import Anthropic from "@anthropic-ai/sdk";
 import { functions, functionMap } from "./index";
 
-dotenv.config();
+import path from "path";
+dotenv.config({ path: path.resolve(__dirname, ".env") });
 
 const app = express();
 const port = process.env.PORT || 3001;
@@ -66,14 +67,23 @@ app.post("/api/chat", async (req, res) => {
 
         // Extract system message
         const systemMessage = messages.find((m: any) => m.role === 'system')?.content ||
-            "You are a helpful and enthusiastic AI assistant. You have access to a 'room' tool that can generate rooms. If the user asks to create, generate, or make a room, use the 'room' tool.";
+            `You are a strict but helpful teacher. Your goal is to help students learn.
+            You ONLY answer questions related to the following subjects:
+            1. Chinese (Language, Vocabulary, Culture)
+            2. English Vocabulary (Definitions, Synonyms, Usage)
+            3. Math (Arithmetic, Algebra, Geometry, etc.)
+            4. Grammar (English or Chinese grammar rules)
+
+            If a user asks about anything else (e.g., history, science, entertainment, general chat unrelated to learning these subjects), you must politely decline and remind them that you can only help with Chinese, English Vocabulary, Math, or Grammar.
+            
+            Be encouraging and educational in your responses.`;
 
         let anthropicMessages = convertToAnthropicMessages(messages);
         const tools = convertToAnthropicTools(functions);
 
         // First call to Anthropic
         let msg = await anthropic.messages.create({
-            model: "claude-3-5-sonnet-20241022",
+            model: "claude-3-5-haiku-20241022",
             max_tokens: 1024,
             system: systemMessage,
             messages: anthropicMessages,
@@ -120,7 +130,7 @@ app.post("/api/chat", async (req, res) => {
 
                 // Get final response
                 msg = await anthropic.messages.create({
-                    model: "claude-3-5-sonnet-20241022",
+                    model: "claude-3-5-haiku-20241022",
                     max_tokens: 1024,
                     system: systemMessage,
                     messages: anthropicMessages,
@@ -130,7 +140,7 @@ app.post("/api/chat", async (req, res) => {
         }
 
         // Convert Anthropic response to OpenAI format for frontend compatibility
-        const textContent = msg.content.find(c => c.type === "text") as any;
+        const textContent = msg.content.find((c: any) => c.type === "text") as any;
         const responseContent = textContent ? textContent.text : "";
 
         const openaiCompatibleResponse = {
@@ -140,7 +150,7 @@ app.post("/api/chat", async (req, res) => {
 
         res.json(openaiCompatibleResponse);
 
-    } catch (error) {
+    } catch (error: any) {
         console.error("Error in chat endpoint:", error);
         res.status(500).json({ error: "Internal server error" });
     }
