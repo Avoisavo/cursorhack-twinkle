@@ -1,4 +1,4 @@
-# CursorHack - Twinkle
+# Twinkle
 
 ## Background of the Story
 The last time I worked, I was a part-time teacher at a primary school where I had the chance to teach students with ADHD. I realized something strange: these kids are actually very curious about their surroundings and the material I taught. Yet, they still suffered from poor school performance, were bullied by friends, and often ate lunch alone.
